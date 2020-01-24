@@ -1,8 +1,25 @@
-import discord
-from discord.ext import commands
+#!env/bin/python3
+# coding: utf-8
+
+# Generic/Built-in
 import logging
 import datetime
 import json
+
+# Other Libs
+import discord
+from discord.ext import commands
+
+# Owned
+__author__ = "Tristan Leroy"
+__copyright__ = "None"
+__credits__ = ["Tristan Leroy"]
+__license__ = "None"
+__version__ = "0.0.1"
+__maintainer__ = "Tristan Leroy"
+__email__ = "contact@redbow.fr"
+__status__ = "Devs"
+
 
 bot = commands.Bot(command_prefix=">")
 logging.basicConfig(format='%(levelname)s|%(asctime)s|%(message)s', datefmt='%d/%m/%Y %H:%M,%S', filename="redbot.log", filemode="w", level=logging.INFO)
