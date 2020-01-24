@@ -2,9 +2,14 @@ import discord
 from discord.ext import commands
 import logging
 import datetime
+import json
 
 bot = commands.Bot(command_prefix=">")
 logging.basicConfig(format='%(levelname)s|%(asctime)s|%(message)s', datefmt='%d/%m/%Y %H:%M,%S', filename="redbot.log", filemode="w", level=logging.INFO)
+
+with open("config.json") as json_file:
+    conf = json.load(json_file)
+    json_file.close()
 
 @bot.event
 async def on_ready():
@@ -29,4 +34,4 @@ TODO: User stats
 TODO: GET_USERS_STATS commands
 """
 
-bot.run("NTYzMzk3MjgzODQ1MjQyODgx.XiqlyQ._xpS7x3k-6YUZtfxkwQ8xxZrW4g")
+bot.run(conf["TOKEN"])
