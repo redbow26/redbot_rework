@@ -32,12 +32,13 @@ bot = commands.Bot(command_prefix=get_prefix)
 
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.INFO)
-discord_handler = logging.FileHandler(filename="discord.log", encoding='uft-8', filemode="w",)
-discord_handler.setFormatter(logging.Formatter(format='%(levelname)s:%(asctime)s:%(message)s', datefmt='%d/%m/%Y '
-                                                                                                       '%H:%M,%S'))
+discord_handler = logging.FileHandler(filename="discord.log")
+discord_handler.setFormatter(logging.Formatter(fmt='%(levelname)s:%(asctime)s:%(message)s', datefmt='%d/%m/%Y '
+                                                                                                    '%H:%M,%S'))
 
-logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', datefmt='%d/%m/%Y %H:%M,%S', encoding='utf-8',
-                    filemode="w", filename="redbot.log", level=logging.INFO)
+logging.basicConfig(datefmt='%d/%m/%Y %H:%M,%S', filemode="w", filename="redbot.log", format='%(levelname)s:%('
+                                                                                             'asctime)s:%(message)s',
+                    level=logging.INFO)
 
 with open("conf.json") as json_file:
     conf = json.load(json_file)
@@ -79,17 +80,18 @@ async def on_guild_remove(guild):
 
 
 @bot.command()
-async def prefix(ctx, prefix):
+async def prefix(ctx, arg):
     """
     TODO: Add logging
     """
     with open("serveur.json", "r") as f:
         server = json.load(f)
 
-    server[str(ctx.guild.id)]["prefix"] = prefix
+    server[str(ctx.guild.id)]["prefix"] = arg
 
     with open("serveur.json", "w") as f:
         json.dump(server, f, indent=4)
+
 
 """
 TODO: KICK commands
@@ -100,8 +102,6 @@ TODO: TEMPUNBAN tasks
 TODO: Logging systeme on the serveur
 TODO: HELP commands
 TODO: Manage Serveur settings
-TODO: Multiple prefix
-TODO: CHANGE_PREFIX commands
 TODO: Ranks on emote
 TODO: Stream alert [ON/OFF]
 TODO: STRAWPOLL commands
