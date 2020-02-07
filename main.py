@@ -20,23 +20,35 @@ __maintainer__ = "Tristan Leroy"
 __email__ = "contact@redbow.fr"
 __status__ = "Devs"
 
+
 def get_prefix(client, message):
     with open("serveur.json", "r") as f:
-        serveur = json.load(f)
+        server = json.load(f)
 
-    return serveur[str(message.guild.id)]["prefix"]
+    return server[str(message.guild.id)]["prefix"]
+
 
 bot = commands.Bot(command_prefix=get_prefix)
-logging.basicConfig(format='%(levelname)s|%(asctime)s|%(message)s', datefmt='%d/%m/%Y %H:%M,%S', filename="redbot.log", filemode="w", level=logging.INFO)
+
+discord_logger = logging.getLogger('discord')
+discord_logger.setLevel(logging.INFO)
+discord_handler = logging.FileHandler(filename="discord.log", encoding='uft-8', filemode="w",)
+discord_handler.setFormatter(logging.Formatter(format='%(levelname)s:%(asctime)s:%(message)s', datefmt='%d/%m/%Y '
+                                                                                                       '%H:%M,%S'))
+
+logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', datefmt='%d/%m/%Y %H:%M,%S', encoding='utf-8',
+                    filemode="w", filename="redbot.log", level=logging.INFO)
 
 with open("conf.json") as json_file:
     conf = json.load(json_file)
     json_file.close()
 
+
 @bot.event
 async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game("!help"))
     print('bot connected...')
+
 
 @bot.event
 async def on_guild_join(guild):
@@ -44,12 +56,13 @@ async def on_guild_join(guild):
     TODO: Add logging
     """
     with open("serveur.json", "r") as f:
-        serveur = json.load(f)
+        server = json.load(f)
 
-    serveur[str(guild.id)]["prefix"] = "!"
+    server[str(guild.id)]["prefix"] = "!"
 
     with open("serveur.json", "w") as f:
-        json.dump(serveur, f, indent=4)
+        json.dump(server, f, indent=4)
+
 
 @bot.event
 async def on_guild_remove(guild):
@@ -57,12 +70,13 @@ async def on_guild_remove(guild):
     TODO: Add logging
     """
     with open("serveur.json", "r") as f:
-        serveur = json.load(f)
+        server = json.load(f)
 
-    serveur.pop(str(guild.id))
+    server.pop(str(guild.id))
 
     with open("serveur.json", "w") as f:
-        json.dump(serveur, f, indent=4)
+        json.dump(server, f, indent=4)
+
 
 @bot.command()
 async def prefix(ctx, prefix):
@@ -70,12 +84,12 @@ async def prefix(ctx, prefix):
     TODO: Add logging
     """
     with open("serveur.json", "r") as f:
-        serveur = json.load(f)
+        server = json.load(f)
 
-    serveur[str(ctx.guild.id)]["prefix"] = prefix
+    server[str(ctx.guild.id)]["prefix"] = prefix
 
     with open("serveur.json", "w") as f:
-        json.dump(serveur, f, indent=4)
+        json.dump(server, f, indent=4)
 
 """
 TODO: KICK commands
