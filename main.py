@@ -48,6 +48,7 @@ handler = logging.FileHandler(filename="redbot.log", mode='w')
 handler.setFormatter(logging.Formatter(fmt='%(levelname)-8s | %(asctime)-15s | %(name)-15s | %(message)s'))
 logger.addHandler(handler)
 
+
 @bot.command()
 async def load(ctx, extension):
     if extension + ".py" in os.listdir("./cogs"):
@@ -74,26 +75,12 @@ async def unload(ctx, extension):
         logger.error(f"{extension} can not be unload")
 
 
-@bot.command()
-async def prefix(ctx, arg):
-    """
-    TODO: Add logging
-    """
-    with open("serveur.json", "r") as f:
-        server = json.load(f)
-
-    server[str(ctx.guild.id)]["prefix"] = arg
-
-    with open("serveur.json", "w") as f:
-        json.dump(server, f, indent=4)
-
 # TODO: KICK commands
 # TODO: BAN commands
 # TODO: UNBAN commands
 # TODO: TEMPBAN commands
 # TODO: TEMPUNBAN tasks
 # TODO: Logging systeme on the serveur
-# TODO: HELP commands
 # TODO: Manage Serveur settings
 # TODO: Ranks on emote
 # TODO: Stream alert [ON/OFF]

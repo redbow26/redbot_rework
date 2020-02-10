@@ -23,29 +23,33 @@ class Event(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        """
-        TODO: Add logging
-        """
-        with open("../serveur.json", "r") as f:
-            server = json.load(f)
+        try:
+            with open("../serveur.json", "r") as f:
+                server = json.load(f)
+    
+            server[str(guild.id)]["prefix"] = "!"
+    
+            with open("../serveur.json", "w") as f:
+                json.dump(server, f, indent=4)
+            logger.info(f"{guild.name} ({guild.id}) has been added to the serveur.json")
 
-        server[str(guild.id)]["prefix"] = "!"
-
-        with open("../serveur.json", "w") as f:
-            json.dump(server, f, indent=4)
+        except Exception as e:
+            logger.error(f"{guild.name} ({guild.id}) can not be added to the serveur.json | {e}")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        """
-        TODO: Add logging
-        """
-        with open("../serveur.json", "r") as f:
-            server = json.load(f)
+        try:
+            with open("../serveur.json", "r") as f:
+                server = json.load(f)
 
-        server.pop(str(guild.id))
+            server.pop(str(guild.id))
 
-        with open("../serveur.json", "w") as f:
-            json.dump(server, f, indent=4)
+            with open("../serveur.json", "w") as f:
+                json.dump(server, f, indent=4)
+            logger.info(f"{guild.name} ({guild.id}) has been removed from the server.json")
+
+        except Exception as e:
+            logger.error(f"{guild.name} ({guild.id}) can not be removed to the serveur.json | {e}")
 
 
 def setup(bot):
