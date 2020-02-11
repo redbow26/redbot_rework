@@ -23,6 +23,9 @@ __status__ = "Devs"
 
 
 def get_prefix(client, message):
+    """
+    Get a prefix in the serveur.json file for a specific server
+    """
     with open("serveur.json", "r") as f:
         server = json.load(f)
     if message.guild:
@@ -31,6 +34,7 @@ def get_prefix(client, message):
         return "!"
 
 
+# Load the config (TOKEN) in the conf.json file
 with open("conf.json") as json_file:
     conf = json.load(json_file)
     json_file.close()
@@ -38,12 +42,14 @@ with open("conf.json") as json_file:
 bot = commands.Bot(command_prefix=get_prefix)
 bot.remove_command("help")
 
+# Create logger and handler for discord
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.INFO)
 discord_handler = logging.FileHandler(filename="discord.log", mode='w')
 discord_handler.setFormatter(logging.Formatter(fmt='%(levelname)-8s | %(asctime)-15s | %(name)-15s | %(message)s'))
 discord_logger.addHandler(discord_handler)
 
+# Create logger for all of the bot
 logger = logging.getLogger("redbot")
 logger.setLevel(logging.INFO)
 handler = logging.FileHandler(filename="redbot.log", mode='w')
@@ -53,12 +59,17 @@ logger.addHandler(handler)
 
 @bot.command()
 async def load(ctx, extension):
+    """
+    Use for load a cogs
+    """
     if extension + ".py" in os.listdir("./cogs"):
         try:
             bot.load_extension(f"cogs.{extension}")
+            dm = await ctx.message.author.create_dm()
+            await dm.send(f"{extension} has been load")
             logger.info(f"{extension} load")
         except Exception as e:
-            logger.error(f"bot can not load {extension} | {e}")
+            logger.error(f"bot can not load {extension}\n{e}")
     else:
         ctx.send("The extension can not be load")
         logger.error(f"{extension} can not be load")
@@ -66,31 +77,24 @@ async def load(ctx, extension):
 
 @bot.command()
 async def unload(ctx, extension):
-    if extension + ".py" in os.listdir("./cogs"):
-        try:
-            bot.unload_extension(f"cogs.{extension}")
-            logger.info(f"{extension} unload")
-        except Exception as e:
-            logger.error(f"bot can not unload {extension} | {e}")
-    else:
-        ctx.send("The extension can not be unload")
-        logger.error(f"{extension} can not be unload")
+    """
+        Use for unload a cogs
+    """
+    try:
+        bot.unload_extension(f"cogs.{extension}")
+        dm = await ctx.message.author.create_dm()
+        await dm.send(f"{extension} has been unload")
+        logger.info(f"{extension} unload")
+    except Exception as e:
+        logger.error(f"bot can not unload {extension}\n{e}")
 
-
-# TODO: KICK commands
-# TODO: BAN commands
-# TODO: UNBAN commands
-# TODO: TEMPBAN commands
-# TODO: TEMPUNBAN tasks
-# TODO: Logging systeme on the serveur
-# TODO: Manage Serveur settings
 # TODO: Ranks on emote
 # TODO: Stream alert [ON/OFF]
 # TODO: STRAWPOLL commands
 # TODO: User stats
 # TODO: GET_USERS_STATS commands
 
-
+# Load all the cogs at the launch of the bot
 for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         try:
@@ -98,4 +102,5 @@ for filename in os.listdir('./cogs'):
         except Exception as e:
             logger.error(f"bot can not load {filename[:-3]} | {e}")
 
+# Launch le bot
 bot.run(conf["TOKEN"])

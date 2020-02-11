@@ -13,8 +13,13 @@ logger = logging.getLogger("redbot")
 
 
 class Setting(commands.Cog):
+    """
+    Setting commands
+    """
     def __init__(self, bot):
         self.bot = bot
+
+    # TODO: Manage Server settings
 
     @commands.command()
     async def prefix(self, ctx, arg):
@@ -29,7 +34,7 @@ class Setting(commands.Cog):
                 
             logger.info(f"Prefix changed for {ctx.guild.name}")
         except Exception as e:
-            logger.error(f"Prefix not change for {ctx.guild.name} | {e}")
+            logger.error(f"Prefix not change for {ctx.guild.name}\n{e}")
 
 
 def setup(bot):

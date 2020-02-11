@@ -13,6 +13,9 @@ logger = logging.getLogger("redbot")
 
 
 class Event(commands.Cog):
+    """
+    Use to list all of the event
+    """
     def __init__(self, bot):
         self.bot = bot
 
@@ -34,7 +37,7 @@ class Event(commands.Cog):
             logger.info(f"{guild.name} ({guild.id}) has been added to the serveur.json")
 
         except Exception as e:
-            logger.error(f"{guild.name} ({guild.id}) can not be added to the serveur.json | {e}")
+            logger.error(f"{guild.name} ({guild.id}) can not be added to the serveur.json\n{e}")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -49,7 +52,7 @@ class Event(commands.Cog):
             logger.info(f"{guild.name} ({guild.id}) has been removed from the server.json")
 
         except Exception as e:
-            logger.error(f"{guild.name} ({guild.id}) can not be removed to the serveur.json | {e}")
+            logger.error(f"{guild.name} ({guild.id}) can not be removed to the serveur.json\n{e}")
 
 
 def setup(bot):

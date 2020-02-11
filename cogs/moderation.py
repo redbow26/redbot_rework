@@ -13,8 +13,18 @@ logger = logging.getLogger("redbot")
 
 
 class Moderation(commands.Cog):
+    """
+    Moderation commands
+    """
     def __init__(self, bot):
         self.bot = bot
+
+    # TODO: KICK commands
+    # TODO: BAN commands
+    # TODO: UNBAN commands
+    # TODO: TEMPBAN commands
+    # TODO: TEMPUNBAN tasks
+    # TODO: Logging systeme on the serveur
 
     @commands.command()
     async def purge(self, ctx, arg=0):
@@ -25,7 +35,7 @@ class Moderation(commands.Cog):
                         f"has been purge by {ctx.message.author.name} ({ctx.message.author.mention})")
         except Exception as e:
             logger.error(f"{ctx.channel.name} ({ctx.channel.id}) in {ctx.guild.name} ({ctx.guild.id}) can not be "
-                         f"purge by {ctx.message.author.name} ({ctx.message.author.mention}) of {arg} message | {e}")
+                         f"purge by {ctx.message.author.name} ({ctx.message.author.mention}) of {arg} message\n{e}")
 
 
 def setup(bot):
