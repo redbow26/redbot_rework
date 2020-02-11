@@ -25,8 +25,10 @@ __status__ = "Devs"
 def get_prefix(client, message):
     with open("serveur.json", "r") as f:
         server = json.load(f)
-
-    return server[str(message.guild.id)]["prefix"]
+    if message.guild:
+        return server[str(message.guild.id)]["prefix"]
+    else:
+        return "!"
 
 
 with open("conf.json") as json_file:
