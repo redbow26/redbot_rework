@@ -4,6 +4,7 @@
 # Generic/Built-in
 import logging
 import json
+import datetime
 
 # Other Libs
 import discord
@@ -16,17 +17,17 @@ class Moderation(commands.Cog):
     """
     Moderation commands
     """
+
     def __init__(self, bot):
         self.bot = bot
 
-    # TODO: KICK commands
-    # TODO: BAN commands
     # TODO: UNBAN commands
     # TODO: TEMPBAN commands
     # TODO: TEMPUNBAN tasks
     # TODO: Logging systeme on the serveur
 
     @commands.command()
+    @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, arg=0):
         try:
             arg = int(arg) + 1
@@ -36,6 +37,92 @@ class Moderation(commands.Cog):
         except Exception as e:
             logger.error(f"{ctx.channel.name} ({ctx.channel.id}) in {ctx.guild.name} ({ctx.guild.id}) can not be "
                          f"purge by {ctx.message.author.name} ({ctx.message.author.mention}) of {arg} message\n{e}")
+
+    @commands.command()
+    @commands.has_permissions(kick_members=True)
+    async def kick(self, ctx, member: discord.Member = None, *, reason=""):
+        author = ctx.message.author
+        guild = ctx.guild
+        date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if member:
+            if reason != "":
+                try:
+                    dm = await member.create_dm()
+                    embed_dm = discord.Embed(title="Kick", description="---------------------------------------------"
+                                                                       "---------", color=discord.Color.red())
+                    embed_dm.add_field(name="Kicked by: ", value=f"{author.mention}", inline=False)
+                    embed_dm.add_field(name="Server: ", value=f"{guild.name}", inline=False)
+                    embed_dm.add_field(name="Reason: ",
+                                       value=f"{reason}\n------------------------------------------------------",
+                                       inline=False)
+                    embed_dm.set_footer(text=f"Requested by {author}  {date}", icon_url=author.avatar_url)
+
+                    await dm.send(embed=embed_dm)
+
+                    await guild.kick(user=member, reason=reason)
+                    embed = discord.Embed(title="Member kick",
+                                          description="---------------------------------------------"
+                                                      "---------", color=0x00ff00)
+                    embed.add_field(name="Kicked by: ", value=f"{author.mention}", inline=False)
+                    embed.add_field(name="Kicked: ", value=f"<@{member.id}>", inline=False)
+                    embed.add_field(name="Reason: ",
+                                    value=f"{reason}\n------------------------------------------------------",
+                                    inline=False)
+                    embed.set_footer(text=f"Requested by {author}  {date}", icon_url=author.avatar_url)
+
+                    await ctx.send(embed=embed)
+
+                    logger.info(f'{member.name} ({member.mention}) in {guild.name} ({guild.id})'
+                                f' kicked by {author.name} ({author.mention}) for "{reason}"')
+                except Exception as e:
+                    logger.error(f'{member.name} ({member.mention}) in {guild.name} ({guild.id}) can not be '
+                                 f' kick by {author.name} ({author.mention}) for "{reason}"\n{e}')
+            else:
+                await ctx.send("You need to precise a reason")
+        else:
+            await ctx.send("To kick someone you need to tag this person")
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    async def ban(self, ctx, member: discord.Member = None, *, reason=""):
+        author = ctx.message.author
+        guild = ctx.guild
+        date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if member:
+            if reason != "":
+                try:
+                    dm = await member.create_dm()
+                    embed_dm = discord.Embed(title="Ban", description="---------------------------------------------"
+                                                                      "---------", color=discord.Color.red())
+                    embed_dm.add_field(name="Banned by: ", value=f"{author.mention}", inline=False)
+                    embed_dm.add_field(name="Server: ", value=f"{guild.name}", inline=False)
+                    embed_dm.add_field(name="Reason: ",
+                                       value=f"{reason}\n------------------------------------------------------",
+                                       inline=False)
+                    embed_dm.set_footer(text=f"Requested by {author}  {date}", icon_url=author.avatar_url)
+
+                    await dm.send(embed=embed_dm)
+
+                    await guild.ban(user=member, reason=reason)
+                    embed = discord.Embed(title="Member ban", description="-------------------------------------------"
+                                                                          "-----------", color=0x00ff00)
+                    embed.add_field(name="Ban by: ", value=f"{author.mention}", inline=False)
+                    embed.add_field(name="Ban: ", value=f"<@{member.id}>", inline=False)
+                    embed.add_field(name="Reason: ",
+                                    value=f"{reason}\n------------------------------------------------------",
+                                    inline=False)
+                    embed.set_footer(text=f"Requested by {author}  {date}", icon_url=author.avatar_url)
+
+                    await ctx.send(embed=embed)
+                    logger.info(f'{member.name} ({member.mention}) in {guild.name} ({guild.id})'
+                                f' banned by {author.name} ({author.mention}) for "{reason}"')
+                except Exception as e:
+                    logger.error(f'{member.name} ({member.mention}) in {guild.name} ({guild.id}) can not be '
+                                 f' ban by {author.name} ({author.mention}) for "{reason}"\n{e}')
+            else:
+                await ctx.send("You need to precise a reason")
+        else:
+            await ctx.send("To ban someone you need to tag this person")
 
 
 def setup(bot):

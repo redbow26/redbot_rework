@@ -20,21 +20,25 @@ class Love(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.cooldown(2, 30, commands.BucketType.user)
     async def hug(self, ctx, member: discord.Member = None):
-        if member is not None:
+        author = ctx.message.author
+        if member is not None and member != self.bot:
             dm = await member.create_dm()
-            await dm.send(f"{ctx.message.author.mention} send you a hug")
+            await dm.send(f"{author.name} send you a hug")
         else:
-            dm = await ctx.message.author.create_dm()
+            dm = await author.create_dm()
             await dm.send("*hug*")
 
     @commands.command()
+    @commands.cooldown(2, 30, commands.BucketType.user)
     async def kiss(self, ctx, member: discord.Member = None):
+        author = ctx.message.author
         if member is not None:
             dm = await member.create_dm()
-            await dm.send(f"{ctx.message.author.mention} kiss you")
+            await dm.send(f"{author.name} kiss you")
         else:
-            dm = await ctx.message.author.create_dm()
+            dm = await author.create_dm()
             await dm.send("*kiss*")
 
 

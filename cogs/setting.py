@@ -12,6 +12,12 @@ from discord.ext import commands
 logger = logging.getLogger("redbot")
 
 
+def is_guild_owner():
+    def predicate(ctx):
+        return ctx.guild is not None and ctx.guild.owner_id == ctx.author.id
+    return commands.check(predicate)
+
+
 class Setting(commands.Cog):
     """
     Setting commands
@@ -22,6 +28,7 @@ class Setting(commands.Cog):
     # TODO: Manage Server settings
 
     @commands.command()
+    @commands.check_any(commands.is_owner(), is_guild_owner())
     async def prefix(self, ctx, arg):
         try:
             with open("../serveur.json", "r") as f:

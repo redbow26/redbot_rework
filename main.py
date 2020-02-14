@@ -58,6 +58,7 @@ logger.addHandler(handler)
 
 
 @bot.command()
+@commands.is_owner()
 async def load(ctx, extension):
     """
     Use for load a cogs
@@ -76,6 +77,7 @@ async def load(ctx, extension):
 
 
 @bot.command()
+@commands.is_owner()
 async def unload(ctx, extension):
     """
         Use for unload a cogs
