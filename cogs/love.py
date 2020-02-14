@@ -18,6 +18,10 @@ class Love(commands.Cog):
     """
     def __init__(self, bot):
         self.bot = bot
+        # Load the setting
+        with open("../conf.json") as json_file:
+            self.setting = json.load(json_file)
+            json_file.close()
 
     @commands.command()
     @commands.cooldown(2, 30, commands.BucketType.user)
@@ -40,6 +44,17 @@ class Love(commands.Cog):
         else:
             dm = await author.create_dm()
             await dm.send("*kiss*")
+
+    @commands.command()
+    @commands.cooldown(2, 30, commands.BucketType.user)
+    async def boop(self, ctx, member: discord.Member = None):
+        author = ctx.message.author
+        if member is not None:
+            dm = await member.create_dm()
+            await dm.send(f"{author.name} boop you")
+        else:
+            dm = await author.create_dm()
+            await dm.send("*boop*")
 
 
 def setup(bot):

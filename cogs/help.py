@@ -18,6 +18,10 @@ class Help(commands.Cog):
     """
     def __init__(self, bot):
         self.bot = bot
+        # Load the setting
+        with open("../conf.json") as json_file:
+            self.setting = json.load(json_file)
+            json_file.close()
 
     # General help
     @commands.group(invoke_without_command=True)
@@ -26,7 +30,7 @@ class Help(commands.Cog):
         embed.add_field(name="Classique", value="`!help`", inline=True)
         embed.add_field(name="Modération", value="`!kick`\n`!ban`\n`!tempban`", inline=True)
         embed.add_field(name="Setting", value="`!prefix`\n`!config`", inline=True)
-        embed.add_field(name="Love", value="`!hug`\n`!kiss`", inline=True)
+        embed.add_field(name="Love", value="`!hug`\n`!kiss`\n`boop`", inline=True)
 
         await ctx.send(embed=embed)
 
@@ -55,6 +59,7 @@ class Help(commands.Cog):
         embed = discord.Embed(title="Love", description="Love commands", colour=discord.Color.red())
         embed.add_field(name="!hug", value="`envoie un hug`", inline=True)
         embed.add_field(name="!kiss", value="`envoie un kiss`", inline=True)
+        embed.add_field(name="!boop", value="`envoie un boop`", inline=True)
 
         await ctx.send(embed=embed)
 

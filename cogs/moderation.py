@@ -20,6 +20,10 @@ class Moderation(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        # Load the setting
+        with open("../conf.json") as json_file:
+            self.setting = json.load(json_file)
+            json_file.close()
 
     # TODO: UNBAN commands
     # TODO: TEMPBAN commands
@@ -60,17 +64,21 @@ class Moderation(commands.Cog):
                     await dm.send(embed=embed_dm)
 
                     await guild.kick(user=member, reason=reason)
-                    embed = discord.Embed(title="Member kick",
-                                          description="---------------------------------------------"
-                                                      "---------", color=0x00ff00)
-                    embed.add_field(name="Kicked by: ", value=f"{author.mention}", inline=False)
-                    embed.add_field(name="Kicked: ", value=f"<@{member.id}>", inline=False)
-                    embed.add_field(name="Reason: ",
-                                    value=f"{reason}\n------------------------------------------------------",
-                                    inline=False)
-                    embed.set_footer(text=f"Requested by {author}  {date}", icon_url=author.avatar_url)
 
-                    await ctx.send(embed=embed)
+                    if self.setting[str(guild.id)]["log_channel"] is not None:
+
+                        channel = await self.bot.fetch_channel(self.setting[str(guild.id)]["log_channel"])
+                        embed = discord.Embed(title="Member kick",
+                                              description="---------------------------------------------"
+                                                          "---------", color=0x00ff00)
+                        embed.add_field(name="Kicked by: ", value=f"{author.mention}", inline=False)
+                        embed.add_field(name="Kicked: ", value=f"<@{member.id}>", inline=False)
+                        embed.add_field(name="Reason: ",
+                                        value=f"{reason}\n------------------------------------------------------",
+                                        inline=False)
+                        embed.set_footer(text=f"Requested by {author}  {date}", icon_url=author.avatar_url)
+
+                        await channel.send(embed=embed)
 
                     logger.info(f'{member.name} ({member.mention}) in {guild.name} ({guild.id})'
                                 f' kicked by {author.name} ({author.mention}) for "{reason}"')
@@ -103,17 +111,22 @@ class Moderation(commands.Cog):
 
                     await dm.send(embed=embed_dm)
 
-                    await guild.ban(user=member, reason=reason)
-                    embed = discord.Embed(title="Member ban", description="-------------------------------------------"
-                                                                          "-----------", color=0x00ff00)
-                    embed.add_field(name="Ban by: ", value=f"{author.mention}", inline=False)
-                    embed.add_field(name="Ban: ", value=f"<@{member.id}>", inline=False)
-                    embed.add_field(name="Reason: ",
-                                    value=f"{reason}\n------------------------------------------------------",
-                                    inline=False)
-                    embed.set_footer(text=f"Requested by {author}  {date}", icon_url=author.avatar_url)
+                    if self.setting[str(guild.id)]["log_channel"] is not None:
 
-                    await ctx.send(embed=embed)
+                        channel = await self.bot.fetch_channel(self.setting[str(guild.id)]["log_channel"])
+
+                        await guild.ban(user=member, reason=reason)
+                        embed = discord.Embed(title="Member ban", description="---------------------------------------"
+                                                                              "---------------", color=0x00ff00)
+                        embed.add_field(name="Ban by: ", value=f"{author.mention}", inline=False)
+                        embed.add_field(name="Ban: ", value=f"<@{member.id}>", inline=False)
+                        embed.add_field(name="Reason: ",
+                                        value=f"{reason}\n------------------------------------------------------",
+                                        inline=False)
+                        embed.set_footer(text=f"Requested by {author}  {date}", icon_url=author.avatar_url)
+
+                        await channel.send(embed=embed)
+
                     logger.info(f'{member.name} ({member.mention}) in {guild.name} ({guild.id})'
                                 f' banned by {author.name} ({author.mention}) for "{reason}"')
                 except Exception as e:

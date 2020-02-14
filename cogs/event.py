@@ -31,6 +31,7 @@ class Event(commands.Cog):
                 server = json.load(f)
     
             server[str(guild.id)]["prefix"] = "!"
+            server[str(guild.id)]["log_channel"] = None
     
             with open("../serveur.json", "w") as f:
                 json.dump(server, f, indent=4)
