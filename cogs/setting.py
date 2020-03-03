@@ -58,7 +58,7 @@ class Setting(commands.Cog):
     async def log(self, ctx, arg=""):
         try:
             if arg.lower() in ["none", "no", ""]:
-                self.setting[str(ctx.guild.id)]["log_channel"] = None
+                self.setting[str(ctx.guild.id)]["log_channel_id"] = None
 
                 with open("../serveur.json", "w") as f:
                     json.dump(self.setting, f, indent=4)
@@ -66,7 +66,7 @@ class Setting(commands.Cog):
 
             else:
                 if isinstance(arg, int):
-                    self.setting[str(ctx.guild.id)]["log_channel"] = int(arg)
+                    self.setting[str(ctx.guild.id)]["log_channel_id"] = int(arg)
 
                     with open("../serveur.json", "w") as f:
                         json.dump(self.setting, f, indent=4)
@@ -76,6 +76,52 @@ class Setting(commands.Cog):
 
         except Exception as e:
             logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not change the log setting to {arg}\n{e}")
+
+    @settings.command()
+    @commands.check_any(commands.is_owner(), is_guild_owner())
+    async def regle(self, ctx, arg=""):
+        try:
+            if arg.lower() in ["none", "no", ""]:
+                self.setting[str(ctx.guild.id)]["rule_id"] = None
+
+                with open("../serveur.json", "w") as f:
+                    json.dump(self.setting, f, indent=4)
+                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set None for the rule id")
+
+            else:
+                if isinstance(arg, int):
+                    self.setting[str(ctx.guild.id)]["rule_id"] = int(arg)
+
+                    with open("../serveur.json", "w") as f:
+                        json.dump(self.setting, f, indent=4)
+                    logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set {arg} for the rule id")
+                else:
+                    ctx.send(f"{arg} is not a identifier of a message, it must me a integer")
+
+        except Exception as e:
+            logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not change the rule id setting to {arg}\n{e}")
+
+    @settings.command()
+    @commands.check_any(commands.is_owner(), is_guild_owner())
+    async def base_role(self, ctx, role: discord.Role):
+        try:
+            role_id = role.id
+            if role.is_default():
+                self.setting[str(ctx.guild.id)]["base_role_id"] = None
+
+                with open("../serveur.json", "w") as f:
+                    json.dump(self.setting, f, indent=4)
+                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set None for the base role id")
+
+            else:
+                self.setting[str(ctx.guild.id)]["rule_id"] = role_id
+
+                with open("../serveur.json", "w") as f:
+                    json.dump(self.setting, f, indent=4)
+                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set {role_id} for the base role id")
+
+        except Exception as e:
+            logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not change the rule id setting to {role_id}\n{e}")
 
 
 def setup(bot):
