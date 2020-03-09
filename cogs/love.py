@@ -3,12 +3,17 @@
 
 # Generic/Built-in
 import logging
+import datetime
 import json
+import os
+import asyncio
+import sqlite3
 
 # Other Libs
 import discord
 from discord.ext import commands
 
+discord_logger = logging.getLogger('discord')
 logger = logging.getLogger("redbot")
 
 
@@ -18,10 +23,8 @@ class Love(commands.Cog):
     """
     def __init__(self, bot):
         self.bot = bot
-        # Load the setting
-        with open("../conf.json") as json_file:
-            self.setting = json.load(json_file)
-            json_file.close()
+        self.conn = bot.db_conn
+        self.cursor = bot.db_cursor
 
     @commands.command()
     @commands.cooldown(2, 30, commands.BucketType.user)

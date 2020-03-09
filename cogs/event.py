@@ -3,12 +3,17 @@
 
 # Generic/Built-in
 import logging
+import datetime
 import json
+import os
+import asyncio
+import sqlite3
 
 # Other Libs
 import discord
 from discord.ext import commands
 
+discord_logger = logging.getLogger('discord')
 logger = logging.getLogger("redbot")
 
 
@@ -18,10 +23,8 @@ class Event(commands.Cog):
     """
     def __init__(self, bot):
         self.bot = bot
-        # Load the settings
-        with open("../conf.json") as json_file:
-            self.setting = json.load(json_file)
-            json_file.close()
+        self.conn = bot.db_conn
+        self.cursor = bot.db_cursor
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -31,36 +34,34 @@ class Event(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         try:
-            with open("../serveur.json", "r") as f:
-                server = json.load(f)
-    
-            server[str(guild.id)]["prefix"] = "!"
-            server[str(guild.id)]["strawpoll"] = {}
-            server[str(guild.id)]["log_channel_id"] = None
-            server[str(guild.id)]["rule_id"] = None
-            server[str(guild.id)]["base_role_id"] = None
-    
-            with open("../serveur.json", "w") as f:
-                json.dump(server, f, indent=4)
-            logger.info(f"{guild.name} ({guild.id}) has been added to the serveur.json")
+            self.cursor.execute("INSERT INTO SERVER(id_server, name) VALUES (?, ?)", (guild.id, guild.name))
+
+            logger.info(f"{guild.name} ({guild.id}) has been added to the database")
 
         except Exception as e:
-            logger.error(f"{guild.name} ({guild.id}) can not be added to the serveur.json\n{e}")
+            self.conn.rollback()
+            logger.error(f"{guild.name} ({guild.id}) can not be added to the database\n{e}")
+
+        finally:
+            self.conn.commit()
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        guild = await self.bot.fetch_guild(payload.guild_id)
+        member = await guild.fetch_member(payload.user_id)
+        message_id = payload.message_id
+
         try:
-            guild = payload.guild
-            member = payload.member
-            message_id = payload.message_id
-            if message_id == self.setting[str(guild.id)]["rule_id"] and self.setting[str(guild.id)]["base_role_id"] \
-                    is not None:
-                roles = await payload.guild.fetch_roles()
-                for r in roles:
-                    if r.id == self.setting[str(guild.id)]["base_role_id"]:
-                        role = r
-                await member.add_roles(role, reason="Accept the rule")
-                logger.info(f'{member} ({member.mention}) in {guild.name} ({guild.id}) has get the base role')
+            if guild:
+                self.cursor.execute("SELECT rule_id, base_role_id FROM SERVER WHERE id_server=?", (str(guild.id), ))
+                data = self.cursor.fetchone()
+
+                if data:
+                    if message_id == int(data[0]) and data[1] is not None:
+                        role = guild.get_role(int(data[1]))
+                        await member.add_roles(role, reason="Accept the rule")
+                        logger.info(f'{member} ({member.mention}) in {guild.name} ({guild.id}) has get the base role')
+
         except Exception as e:
             logger.error(f'{member} ({member.mention}) in {guild.name} ({guild.id}) can not get the base role\n{e}')
 
@@ -83,17 +84,15 @@ class Event(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         try:
-            with open("../serveur.json", "r") as f:
-                server = json.load(f)
-
-            server.pop(str(guild.id))
-
-            with open("../serveur.json", "w") as f:
-                json.dump(server, f, indent=4)
-            logger.info(f"{guild.name} ({guild.id}) has been removed from the server.json")
+            self.cursor.execute("DELETE FROM SERVER WHERE id_server=?", (str(guild.id), ))
+            logger.error(f"{guild.name} ({guild.id}) has been added to the database")
 
         except Exception as e:
-            logger.error(f"{guild.name} ({guild.id}) can not be removed to the serveur.json\n{e}")
+            self.conn.rollback()
+            logger.error(f"{guild.name} ({guild.id}) can not be removed to the database\n{e}")
+
+        finally:
+            self.conn.commit()
 
 
 def setup(bot):

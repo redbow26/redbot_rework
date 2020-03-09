@@ -1636,3 +1636,4 @@ conf.json
 /.idea/redbot.iml
 /.idea/vcs.xml
 /discord.log
+server.db

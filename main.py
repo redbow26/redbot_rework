@@ -6,6 +6,8 @@ import logging
 import datetime
 import json
 import os
+import asyncio
+import sqlite3
 
 # Other Libs
 import discord
@@ -16,7 +18,7 @@ __author__ = "Tristan Leroy"
 __copyright__ = "None"
 __credits__ = ["Tristan Leroy"]
 __license__ = "None"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __maintainer__ = "Tristan Leroy"
 __email__ = "contact@redbow.fr"
 __status__ = "Devs"
@@ -24,14 +26,69 @@ __status__ = "Devs"
 
 def get_prefix(client, message):
     """
-    Get a prefix in the serveur.json file for a specific server
+    Get a prefix in the database (server.db file) for each server
+
+    if server don't have prefix return "!"
     """
-    with open("serveur.json", "r") as f:
-        server = json.load(f)
+    conn_prefix = sqlite3.connect("server.db")
+    cursor_prefix = conn_prefix.cursor()
+
     if message.guild:
-        return server[str(message.guild.id)]["prefix"]
+        cursor_prefix.execute("SELECT prefix FROM SERVER WHERE id_server=?", (str(message.guild.id), ))
+        prefix_data = cursor_prefix.fetchone()
+
+        if prefix_data:
+            prefix = prefix_data[0]
+
+        else:
+            cursor_prefix.execute("INSERT INTO SERVER(id_server, name) VALUES (?, ?)", (message.guild.id, message.guild
+                                                                                        .name))
+            prefix = "!"
     else:
-        return "!"
+        prefix = "!"
+
+    conn_prefix.commit()
+    conn_prefix.close()
+
+    return prefix
+
+
+def init_db(db_cursor, db_conn):
+    """
+    Initialise db if table doesn't exist
+
+
+    :param db_cursor: Database cursor
+
+    :param db_conn: Database connection
+    """
+    db_cursor.execute("""CREATE TABLE IF NOT EXISTS SERVER (
+                        id_server           INT             PRIMARY KEY,
+                        name                VARCHAR(100)    NOT NULL,
+                        prefix              VARCHAR(20)     DEFAULT         '!',
+                        log_channel_id      VARCHAR(100),
+                        rule_id             VARCHAR(100),
+                        base_role_id        VARCHAR(100),
+                        hug                 BOOL            NOT NULL        DEFAULT TRUE,
+                        kiss                BOOL            NOT NULL        DEFAULT TRUE,
+                        boop                BOOL            NOT NULL        DEFAULT TRUE,
+                        purge               BOOL            NOT NULL        DEFAULT TRUE,
+                        kick                BOOL            NOT NULL        DEFAULT TRUE,
+                        ban                 BOOL            NOT NULL        DEFAULT TRUE,
+                        yellowchem          BOOL            NOT NULL        DEFAULT TRUE,
+                        wrongchanel         BOOL            NOT NULL        DEFAULT TRUE
+                        )""")
+    # TODO: Add the check in the commands
+
+    db_cursor.execute("""CREATE TABLE IF NOT EXISTS STRAWPOLL (
+                            id_strawpoll        INT             PRIMARY KEY,
+                            id_server           INT             NOT NULL,
+                            text                TEXT            NOT NULL,
+                            date                DATE            NOT NULL,
+                            choice_dict         TEXT            NOT NULL
+                            )""")
+
+    db_conn.commit()
 
 
 # Load the config (TOKEN) in the conf.json file
@@ -39,29 +96,56 @@ with open("conf.json") as json_file:
     conf = json.load(json_file)
     json_file.close()
 
-bot = commands.Bot(command_prefix=get_prefix)
-bot.remove_command("help")
 
-# Create logger and handler for discord
+class Bot(commands.Bot):
+    """
+    New Bot class
+    Extends discord.ext.commands.Bot
+
+    Use to save the database in the variable bot
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            description=kwargs.pop("descriptions"),
+            command_prefix=kwargs.pop("command_prefix")
+        )
+
+        self.db_conn = kwargs.pop("db_conn")
+        self.db_cursor = kwargs.pop("db_cursor")
+
+
+# Create main logger and handler for discord.py
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.INFO)
 discord_handler = logging.FileHandler(filename="discord.log", mode='w')
 discord_handler.setFormatter(logging.Formatter(fmt='%(levelname)-8s | %(asctime)-15s | %(name)-15s | %(message)s'))
 discord_logger.addHandler(discord_handler)
 
-# Create logger for all of the bot
+# Create logger for the bot it self (redbot)
 logger = logging.getLogger("redbot")
 logger.setLevel(logging.INFO)
 handler = logging.FileHandler(filename="redbot.log", mode='w')
 handler.setFormatter(logging.Formatter(fmt='%(levelname)-8s | %(asctime)-15s | %(name)-15s | %(message)s'))
 logger.addHandler(handler)
 
+conn = sqlite3.connect("server.db")  # SQLITE3 connection to server.db
+cursor = conn.cursor()
+init_db(cursor, conn)
+
+# TODO: connect db in all the file
+
+DESCRIPTION = ""
+
+bot = Bot(command_prefix=get_prefix, descriptions=DESCRIPTION, db_conn=conn, db_cursor=cursor)
+bot.remove_command("help")
+
 
 @bot.command()
 @commands.is_owner()
 async def load(ctx, extension):
     """
-    Use for load a cogs
+    Command for load a cogs
     """
     if extension + ".py" in os.listdir("./cogs"):
         try:
@@ -80,7 +164,7 @@ async def load(ctx, extension):
 @commands.is_owner()
 async def unload(ctx, extension):
     """
-        Use for unload a cogs
+    Command for unload a cogs
     """
     try:
         bot.unload_extension(f"cogs.{extension}")
@@ -90,11 +174,12 @@ async def unload(ctx, extension):
     except Exception as e:
         logger.error(f"bot can not unload {extension}\n{e}")
 
-# TODO: Ranks on emote
+
 # TODO: Stream alert [ON/OFF]
 # TODO: STRAWPOLL commands
 # TODO: User stats
 # TODO: GET_USERS_STATS commands
+# TODO: Change every serveur.json for db
 
 # Load all the cogs at the launch of the bot
 for filename in os.listdir('./cogs'):
@@ -104,5 +189,10 @@ for filename in os.listdir('./cogs'):
         except Exception as e:
             logger.error(f"bot can not load {filename[:-3]} | {e}")
 
-# Launch le bot
-bot.run(conf["TOKEN"])
+loop = asyncio.get_event_loop()  # Create main loop
+try:
+    loop.run_until_complete(bot.start(conf["TOKEN"]))  # Launch le bot in the main loop
+except KeyboardInterrupt:
+    # Keyboard interrupt close the database and stop the main loop
+    bot.db_conn.close()  # Close the database
+    loop.run_until_complete(bot.logout())
