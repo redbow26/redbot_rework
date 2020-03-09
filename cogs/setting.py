@@ -40,17 +40,13 @@ class Setting(commands.Cog):
     @commands.check(is_guild_owner_or_is_owner())
     async def prefix(self, ctx, arg):
         try:
-            with open("serveur.json", "r") as f:
-                server = json.load(f)
-
-            server[str(ctx.guild.id)]["prefix"] = arg
-
-            with open("serveur.json", "w") as f:
-                json.dump(server, f, indent=4)
-
+            self.cursor.execute("UPDATE SERVER SET prefix = ? WHERE id_server = ?", (arg, str(ctx.guild.id),))
             logger.info(f"Prefix changed for {ctx.guild.name}")
         except Exception as e:
+            self.conn.rollback()
             logger.error(f"Prefix not change for {ctx.guild.name}\n{e}")
+        finally:
+            self.conn.commit()
 
     @commands.command()
     @commands.check(is_guild_owner_or_is_owner())
@@ -63,50 +59,52 @@ class Setting(commands.Cog):
     async def log(self, ctx, arg=""):
         try:
             if arg.lower() in ["none", "no", ""]:
-                self.setting[str(ctx.guild.id)]["log_channel_id"] = None
+                self.cursor.execute("UPDATE SERVER SET log_channel_id = ? WHERE id_server = ?",
+                                    (None, str(ctx.guild.id),))
 
-                with open("serveur.json", "w") as f:
-                    json.dump(self.setting, f, indent=4)
-                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set None to log channel")
-
+                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set None for the log channel id")
             else:
                 try:
                     int(arg)
-                    self.setting[str(ctx.guild.id)]["log_channel_id"] = int(arg)
+                    self.cursor.execute("UPDATE SERVER SET log_channel_id = ? WHERE id_server = ?",
+                                        (str(arg), str(ctx.guild.id),))
 
-                    with open("serveur.json", "w") as f:
-                        json.dump(self.setting, f, indent=4)
-                    logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set {arg} to log channel")
+                    logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set {arg} for the log channel id")
                 except ValueError as e:
                     await ctx.send(f"{arg} is not a identifier of a channel, it must me a integer")
 
         except Exception as e:
+            self.conn.rollback()
             logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not change the log setting to {arg}\n{e}")
+
+        finally:
+            self.conn.commit()
 
     @commands.command()
     @commands.check(is_guild_owner_or_is_owner())
     async def regle(self, ctx, arg=""):
         try:
             if arg.lower() in ["none", "no", ""]:
-                self.setting[str(ctx.guild.id)]["rule_id"] = None
+                self.cursor.execute("UPDATE SERVER SET rule_id = ? WHERE id_server = ?",
+                                    (None, str(ctx.guild.id),))
 
-                with open("serveur.json", "w") as f:
-                    json.dump(self.setting, f, indent=4)
                 logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set None for the rule id")
-
             else:
                 try:
                     int(arg)
-                    self.setting[str(ctx.guild.id)]["rule_id"] = int(arg)
+                    self.cursor.execute("UPDATE SERVER SET rule_id = ? WHERE id_server = ?",
+                                        (str(arg), str(ctx.guild.id),))
 
-                    with open("serveur.json", "w") as f:
-                        json.dump(self.setting, f, indent=4)
                     logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set {arg} for the rule id")
                 except ValueError as e:
                     await ctx.send(f"{arg} is not a identifier of a message, it must me a integer")
 
         except Exception as e:
+            self.conn.rollback()
             logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not change the rule id setting to {arg}\n{e}")
+
+        finally:
+            self.conn.commit()
 
     @commands.command()
     @commands.check(is_guild_owner_or_is_owner())
@@ -114,21 +112,23 @@ class Setting(commands.Cog):
         try:
             role_id = role.id
             if role.is_default():
-                self.setting[str(ctx.guild.id)]["base_role_id"] = None
+                self.cursor.execute("UPDATE SERVER SET rule_id = ? WHERE id_server = ?",
+                                    (None, str(ctx.guild.id),))
 
-                with open("serveur.json", "w") as f:
-                    json.dump(self.setting, f, indent=4)
                 logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set None for the base role id")
 
             else:
-                self.setting[str(ctx.guild.id)]["rule_id"] = role_id
+                self.cursor.execute("UPDATE SERVER SET rule_id = ? WHERE id_server = ?",
+                                    (role_id, str(ctx.guild.id),))
 
-                with open("serveur.json", "w") as f:
-                    json.dump(self.setting, f, indent=4)
                 logger.info(f"{ctx.guild.name} ({ctx.guild.id}) has set {role_id} for the base role id")
 
         except Exception as e:
+            self.conn.rollback()
             logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not change the rule id setting to {role_id}\n{e}")
+
+        finally:
+            self.conn.commit()
 
 
 def setup(bot):

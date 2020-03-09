@@ -29,7 +29,17 @@ class Other(commands.Cog):
     @commands.command()
     @commands.cooldown(2, 30, commands.BucketType.user)
     async def yellowchem(self, ctx):
-        await ctx.send("yellow chem is fucking trash !")
+        try:
+            self.cursor.execute("SELECT yellowchem FROM SERVER WHERE id_server=?", (str(ctx.guild.id), ))
+            data = self.cursor.fetchone()
+
+            if data:
+                if data[0]:
+                    await ctx.send("yellow chem is fucking trash !")
+
+        except Exception as e:
+            logger.error(f'{ctx.message.author} ({ctx.message.author.mention}) in {ctx.guild.name} ({ctx.guild.id}) '
+                         f'can not send yellowchem\n{e}')
 
     @commands.command()
     @commands.cooldown(2, 30, commands.BucketType.user)
