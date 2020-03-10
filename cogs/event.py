@@ -28,11 +28,21 @@ class Event(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """
+        When the bot is ready
+        """
+
         await self.bot.change_presence(status=discord.Status.online, activity=discord.Game("!help"))
         print('bot connected...')
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
+        """
+        listener on every guild join
+
+        - add the guild on the database
+        """
+
         try:
             self.cursor.execute("INSERT INTO SERVER(id_server, name) VALUES (?, ?)", (guild.id, guild.name))
 
@@ -47,6 +57,12 @@ class Event(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        """
+        listener on every reaction add
+
+        - check for the rule message to put base role
+        """
+
         guild = await self.bot.fetch_guild(payload.guild_id)
         member = await guild.fetch_member(payload.user_id)
         message_id = payload.message_id
@@ -83,6 +99,12 @@ class Event(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
+        """
+        listener on every guild join
+
+        - add the guild on the database
+        """
+
         try:
             self.cursor.execute("DELETE FROM SERVER WHERE id_server=?", (str(guild.id), ))
             logger.error(f"{guild.name} ({guild.id}) has been added to the database")

@@ -29,6 +29,14 @@ class Love(commands.Cog):
     @commands.command()
     @commands.cooldown(2, 30, commands.BucketType.user)
     async def hug(self, ctx, member: discord.Member = None):
+        """
+        hug command
+        Send hug to the target member in dm
+
+        use:
+            !hug [member]
+        """
+
         try:
             self.cursor.execute("SELECT hug FROM SERVER WHERE id_server=?", (str(ctx.guild.id), ))
             data = self.cursor.fetchone()
@@ -50,6 +58,14 @@ class Love(commands.Cog):
     @commands.command()
     @commands.cooldown(2, 30, commands.BucketType.user)
     async def kiss(self, ctx, member: discord.Member = None):
+        """
+        kiss command
+        Send kiss to the target member in dm
+
+        use:
+            !kiss [member]
+        """
+
         try:
             self.cursor.execute("SELECT kiss FROM SERVER WHERE id_server=?", (str(ctx.guild.id), ))
             data = self.cursor.fetchone()
@@ -71,6 +87,14 @@ class Love(commands.Cog):
     @commands.command()
     @commands.cooldown(2, 30, commands.BucketType.user)
     async def boop(self, ctx, member: discord.Member = None):
+        """
+        Boop command
+        Send boop to the target member in dm
+
+        use:
+            !boop [member]
+        """
+
         try:
             self.cursor.execute("SELECT boop FROM SERVER WHERE id_server=?", (str(ctx.guild.id), ))
             data = self.cursor.fetchone()

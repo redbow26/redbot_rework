@@ -29,6 +29,14 @@ class Other(commands.Cog):
     @commands.command()
     @commands.cooldown(2, 30, commands.BucketType.user)
     async def yellowchem(self, ctx):
+        """
+        yellow chem command
+        reply a message
+
+        use:
+            !yellowchem
+        """
+
         try:
             self.cursor.execute("SELECT yellowchem FROM SERVER WHERE id_server=?", (str(ctx.guild.id), ))
             data = self.cursor.fetchone()

@@ -78,7 +78,6 @@ def init_db(db_cursor, db_conn):
                         yellowchem          BOOL            NOT NULL        DEFAULT TRUE,
                         wrongchanel         BOOL            NOT NULL        DEFAULT TRUE
                         )""")
-    # TODO: Add the check in the commands
 
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS STRAWPOLL (
                             id_strawpoll        INT             PRIMARY KEY,
@@ -133,8 +132,6 @@ conn = sqlite3.connect("server.db")  # SQLITE3 connection to server.db
 cursor = conn.cursor()
 init_db(cursor, conn)
 
-# TODO: connect db in all the file
-
 DESCRIPTION = ""
 
 bot = Bot(command_prefix=get_prefix, descriptions=DESCRIPTION, db_conn=conn, db_cursor=cursor)
@@ -179,7 +176,6 @@ async def unload(ctx, extension):
 # TODO: STRAWPOLL commands
 # TODO: User stats
 # TODO: GET_USERS_STATS commands
-# TODO: Change every serveur.json for db
 
 # Load all the cogs at the launch of the bot
 for filename in os.listdir('./cogs'):

@@ -34,11 +34,30 @@ class Setting(commands.Cog):
         self.conn = bot.db_conn
         self.cursor = bot.db_cursor
 
-    # TODO: Manage Server settings
+    @commands.group(invoke_without_command=True)
+    @commands.check(is_guild_owner_or_is_owner())
+    async def settings(self, ctx):
+        """
+        Global settings group
+        Print a list of all the settings
 
-    @commands.command()
+        use:
+            !setting
+        """
+        # TODO: Make embed to list all of the setting for the server
+        pass
+
+    @settings.command()
     @commands.check(is_guild_owner_or_is_owner())
     async def prefix(self, ctx, arg):
+        """
+        Prefix settings
+        Show the prefix or change it
+
+        use:
+            !setting prefix [arg]
+        """
+
         try:
             self.cursor.execute("UPDATE SERVER SET prefix = ? WHERE id_server = ?", (arg, str(ctx.guild.id),))
             logger.info(f"Prefix changed for {ctx.guild.name}")
@@ -48,15 +67,18 @@ class Setting(commands.Cog):
         finally:
             self.conn.commit()
 
-    @commands.command()
-    @commands.check(is_guild_owner_or_is_owner())
-    async def settings(self, ctx):
-        # TODO: Make embed to list all of the setting for the server
-        pass
-
-    @commands.command()
+    @settings.command()
     @commands.check(is_guild_owner_or_is_owner())
     async def log(self, ctx, arg=""):
+        """
+        Log settings
+        setup the log id
+        to remove the log don't put arg
+
+        use:
+            !setting log [arg]
+        """
+
         try:
             if arg.lower() in ["none", "no", ""]:
                 self.cursor.execute("UPDATE SERVER SET log_channel_id = ? WHERE id_server = ?",
@@ -80,9 +102,18 @@ class Setting(commands.Cog):
         finally:
             self.conn.commit()
 
-    @commands.command()
+    @settings.command()
     @commands.check(is_guild_owner_or_is_owner())
     async def regle(self, ctx, arg=""):
+        """
+        Rule settings
+        setup the rul message id
+        to remove the rule don't put arg
+
+        use:
+            !setting regle [arg]
+        """
+
         try:
             if arg.lower() in ["none", "no", ""]:
                 self.cursor.execute("UPDATE SERVER SET rule_id = ? WHERE id_server = ?",
@@ -106,9 +137,18 @@ class Setting(commands.Cog):
         finally:
             self.conn.commit()
 
-    @commands.command()
+    @settings.command()
     @commands.check(is_guild_owner_or_is_owner())
     async def base_role(self, ctx, role: discord.Role):
+        """
+        Base role settings
+        setup the base role id
+        to remove the base role tag @everyone
+
+        use:
+            !setting base_role arg
+        """
+
         try:
             role_id = role.id
             if role.is_default():
@@ -126,6 +166,66 @@ class Setting(commands.Cog):
         except Exception as e:
             self.conn.rollback()
             logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not change the rule id setting to {role_id}\n{e}")
+
+        finally:
+            self.conn.commit()
+
+    @commands.command()
+    @commands.check(is_guild_owner_or_is_owner())
+    async def activate(self, ctx, command: str):
+        """
+        activate command
+        activate one command for the server
+
+        use:
+            !activate command
+        """
+
+        command = command.lower().split()
+        command_list = ["hug", "kiss", "boop", "purge", "kick", "ban", "yellowchem", "wrongchanel"]
+
+        try:
+            if command in command_list:
+                self.cursor.execute("UPDATE SERVER SET ? = TRUE WHERE id_server = ?",
+                                    (command, str(ctx.guild.id),))
+
+                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) activate {command} in the database\n{e}")
+            else:
+                await ctx.send("La commande n'existe pas.")
+
+        except Exception as e:
+            self.conn.rollback()
+            logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not activate {command} in the database\n{e}")
+
+        finally:
+            self.conn.commit()
+
+    @commands.command()
+    @commands.check(is_guild_owner_or_is_owner())
+    async def deactivate(self, ctx, command: str):
+        """
+        Deactivate command
+        Deactivate one command for the server
+
+        use:
+            !deactivate command
+        """
+
+        command = command.lower().split()
+        command_list = ["hug", "kiss", "boop", "purge", "kick", "ban", "yellowchem", "wrongchanel"]
+
+        try:
+            if command in command_list:
+                self.cursor.execute("UPDATE SERVER SET ? = FALSE WHERE id_server = ?",
+                                    (command, str(ctx.guild.id),))
+
+                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) desactivate {command} in the database\n{e}")
+            else:
+                await ctx.send("La commande n'existe pas.")
+
+        except Exception as e:
+            self.conn.rollback()
+            logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not desactivate {command} in the database\n{e}")
 
         finally:
             self.conn.commit()
