@@ -55,7 +55,7 @@ class Strawpoll(commands.Cog):
 
     @strawpoll.command()
     @commands.has_permissions(manage_messages=True)
-    async def create(self, ctx, text, *choices: str):
+    async def create(self, ctx, text: str, *choices: str):
         """
         Create strawpoll
         create a strawpoll for the server with a text and every choice (ten choices max)
@@ -76,10 +76,11 @@ class Strawpoll(commands.Cog):
                 choices_dict[emote[i]] = choices[i]
 
             self.cursor.execute('SELECT max(id_strawpoll) FROM STRAWPOLL')
-            if self.cursor.fetchone()[0] is None:
+            data = self.cursor.fetchone()
+            if data[0] is None:
                 max_id = 0
             else:
-                max_id = int(self.cursor.fetchone()[0])
+                max_id = int(data[0])
 
             embed.set_footer(text=f"id: {max_id + 1}, created by: {ctx.author.name}")
             await ctx.channel.purge(limit=1)
