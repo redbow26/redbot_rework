@@ -38,7 +38,7 @@ class Setting(commands.Cog):
     @commands.check(is_guild_owner_or_is_owner())
     async def settings(self, ctx):
         """
-        Global settings group
+        Settings group
         Print a list of all the settings
 
         use:
@@ -55,7 +55,7 @@ class Setting(commands.Cog):
         Show the prefix or change it
 
         use:
-            !setting prefix [arg]
+            !setting <prefix>
         """
 
         try:
@@ -76,7 +76,7 @@ class Setting(commands.Cog):
         to remove the log don't put arg
 
         use:
-            !setting log [arg]
+            !setting [<log channel id>]
         """
 
         try:
@@ -102,16 +102,16 @@ class Setting(commands.Cog):
         finally:
             self.conn.commit()
 
-    @settings.command()
+    @settings.command(aliases=["regle"])
     @commands.check(is_guild_owner_or_is_owner())
-    async def regle(self, ctx, arg=""):
+    async def rule(self, ctx, arg=""):
         """
         Rule settings
-        setup the rul message id
+        setup the rule message id
         to remove the rule don't put arg
 
         use:
-            !setting regle [arg]
+            !setting [<regle>]
         """
 
         try:
@@ -146,7 +146,7 @@ class Setting(commands.Cog):
         to remove the base role tag @everyone
 
         use:
-            !setting base_role arg
+            !setting [<base_role>]
         """
 
         try:
@@ -170,7 +170,7 @@ class Setting(commands.Cog):
         finally:
             self.conn.commit()
 
-    @commands.command()
+    @commands.command(aliases=["activer"])
     @commands.check(is_guild_owner_or_is_owner())
     async def activate(self, ctx, command: str):
         """
@@ -178,7 +178,7 @@ class Setting(commands.Cog):
         activate one command for the server
 
         use:
-            !activate command
+            !activate <command>
         """
 
         command = command.lower().split()
@@ -189,7 +189,7 @@ class Setting(commands.Cog):
                 self.cursor.execute("UPDATE SERVER SET ? = TRUE WHERE id_server = ?",
                                     (command, str(ctx.guild.id),))
 
-                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) activate {command} in the database\n{e}")
+                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) activate {command} in the database")
             else:
                 await ctx.send("La commande n'existe pas.")
 
@@ -200,7 +200,7 @@ class Setting(commands.Cog):
         finally:
             self.conn.commit()
 
-    @commands.command()
+    @commands.command(aliases=["desactiver"])
     @commands.check(is_guild_owner_or_is_owner())
     async def deactivate(self, ctx, command: str):
         """
@@ -208,7 +208,7 @@ class Setting(commands.Cog):
         Deactivate one command for the server
 
         use:
-            !deactivate command
+            !deactivate <command>
         """
 
         command = command.lower().split()
@@ -219,13 +219,13 @@ class Setting(commands.Cog):
                 self.cursor.execute("UPDATE SERVER SET ? = FALSE WHERE id_server = ?",
                                     (command, str(ctx.guild.id),))
 
-                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) desactivate {command} in the database\n{e}")
+                logger.info(f"{ctx.guild.name} ({ctx.guild.id}) deactivate {command} in the database")
             else:
                 await ctx.send("La commande n'existe pas.")
 
         except Exception as e:
             self.conn.rollback()
-            logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not desactivate {command} in the database\n{e}")
+            logger.error(f"{ctx.guild.name} ({ctx.guild.id}) can not deactivate {command} in the database\n{e}")
 
         finally:
             self.conn.commit()

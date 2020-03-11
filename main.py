@@ -62,8 +62,9 @@ def init_db(db_cursor, db_conn):
 
     :param db_conn: Database connection
     """
+
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS SERVER (
-                        id_server           INT             PRIMARY KEY,
+                        id_server           VARCHAR(100)    PRIMARY KEY,
                         name                VARCHAR(100)    NOT NULL,
                         prefix              VARCHAR(20)     DEFAULT         '!',
                         log_channel_id      VARCHAR(100),
@@ -80,12 +81,23 @@ def init_db(db_cursor, db_conn):
                         )""")
 
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS STRAWPOLL (
-                            id_strawpoll        INT             PRIMARY KEY,
-                            id_server           INT             NOT NULL,
+                            id_strawpoll        INTEGER         PRIMARY KEY         AUTOINCREMENT,
+                            id_server           VARCHAR(100)    NOT NULL,
+                            id_message          VARCHAR(100)    NOT NULL,
                             text                TEXT            NOT NULL,
                             date                DATE            NOT NULL,
-                            choice_dict         TEXT            NOT NULL
+                            choices_dict        TEXT            NOT NULL,
+                            finish              BOOLEAN         DEFAULT FALSE       NOT NULL
                             )""")
+
+    db_cursor.execute("""CREATE TABLE IF NOT EXISTS TEMPBAN (
+                                id_ban              INTEGER         PRIMARY KEY     AUTOINCREMENT,
+                                id_user             VARCHAR(100)    NOT NULL,
+                                id_server           VARCHAR(100)    NOT NULL,
+                                reason              TEXT            NOT NULL,
+                                date_ban            DATE            NOT NULL,
+                                date_unban          DATE            NOT NULL
+                                )""")
 
     db_conn.commit()
 
@@ -144,6 +156,7 @@ async def load(ctx, extension):
     """
     Command for load a cogs
     """
+
     if extension + ".py" in os.listdir("./cogs"):
         try:
             bot.load_extension(f"cogs.{extension}")
@@ -163,6 +176,7 @@ async def unload(ctx, extension):
     """
     Command for unload a cogs
     """
+
     try:
         bot.unload_extension(f"cogs.{extension}")
         dm = await ctx.message.author.create_dm()
@@ -184,6 +198,7 @@ for filename in os.listdir('./cogs'):
             bot.load_extension(f"cogs.{filename[:-3]}")
         except Exception as e:
             logger.error(f"bot can not load {filename[:-3]} | {e}")
+
 
 loop = asyncio.get_event_loop()  # Create main loop
 try:

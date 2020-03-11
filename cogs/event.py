@@ -66,20 +66,20 @@ class Event(commands.Cog):
         guild = await self.bot.fetch_guild(payload.guild_id)
         member = await guild.fetch_member(payload.user_id)
         message_id = payload.message_id
+        if not member.bot:
+            try:
+                if guild:
+                    self.cursor.execute("SELECT rule_id, base_role_id FROM SERVER WHERE id_server=?", (str(guild.id), ))
+                    data = self.cursor.fetchone()
 
-        try:
-            if guild:
-                self.cursor.execute("SELECT rule_id, base_role_id FROM SERVER WHERE id_server=?", (str(guild.id), ))
-                data = self.cursor.fetchone()
+                    if data:
+                        if data[0] is not None and data[1] is not None and message_id == int(data[0]):
+                            role = guild.get_role(int(data[1]))
+                            await member.add_roles(role, reason="Accept the rule")
+                            logger.info(f'{member} ({member.mention}) in {guild.name} ({guild.id}) has get the base role')
 
-                if data:
-                    if message_id == int(data[0]) and data[1] is not None:
-                        role = guild.get_role(int(data[1]))
-                        await member.add_roles(role, reason="Accept the rule")
-                        logger.info(f'{member} ({member.mention}) in {guild.name} ({guild.id}) has get the base role')
-
-        except Exception as e:
-            logger.error(f'{member} ({member.mention}) in {guild.name} ({guild.id}) can not get the base role\n{e}')
+            except Exception as e:
+                logger.error(f'{member} ({member.mention}) in {guild.name} ({guild.id}) can not get the base role\n{e}')
 
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction, user):

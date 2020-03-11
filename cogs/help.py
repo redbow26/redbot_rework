@@ -29,11 +29,16 @@ class Help(commands.Cog):
     # General help
     @commands.group(invoke_without_command=True)
     async def help(self, ctx):
-        embed = discord.Embed(title="Help", description="!commande [arg] [...]", colour=discord.Color.red())
+        embed = discord.Embed(title="Help", description="!command [<arg> <arg> ...]"
+                                                        "\nargument = <argument>"
+                                                        "\noptionnal argument = [<argument>]"
+                                                        "\nchoice argument = (<arg1> | <arg2>)", colour=discord.Color.red())
         embed.add_field(name="Classique", value="`!help`", inline=True)
         embed.add_field(name="Modération", value="`!kick`\n`!ban`\n`!tempban`", inline=True)
         embed.add_field(name="Setting", value="`!prefix`\n`!config`", inline=True)
         embed.add_field(name="Love", value="`!hug`\n`!kiss`\n`boop`", inline=True)
+        embed.add_field(name="Other", value="`!yellowchem`", inline=True)
+        embed.add_field(name="Strawpoll", value="`!strawpoll [(create|stop)]`", inline=True)
 
         await ctx.send(embed=embed)
 
@@ -66,6 +71,13 @@ class Help(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @help.command()
+    async def strawpoll(self):
+        pass
+
+
     # Individual help commands
+
+
 def setup(bot):
     bot.add_cog(Help(bot))

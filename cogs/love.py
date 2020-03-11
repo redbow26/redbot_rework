@@ -34,7 +34,7 @@ class Love(commands.Cog):
         Send hug to the target member in dm
 
         use:
-            !hug [member]
+            !hug [<member>]
         """
 
         try:
@@ -63,7 +63,7 @@ class Love(commands.Cog):
         Send kiss to the target member in dm
 
         use:
-            !kiss [member]
+            !kiss [<member>]
         """
 
         try:
@@ -92,7 +92,7 @@ class Love(commands.Cog):
         Send boop to the target member in dm
 
         use:
-            !boop [member]
+            !boop [<member>]
         """
 
         try:

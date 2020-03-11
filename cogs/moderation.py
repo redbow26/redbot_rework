@@ -34,6 +34,14 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, arg=0):
+        """
+        purge command
+        purge a chanel with a specified amount of messages
+
+        use:
+            !purge <number of message>
+        """
+
         try:
             self.cursor.execute("SELECT purge FROM SERVER WHERE id_server=?", (str(ctx.guild.id),))
             data = self.cursor.fetchone()
@@ -52,13 +60,22 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member = None, *, reason=""):
+        """
+        Kick command
+        kick a user, send him a message and log the kick on the log channel
+
+        use:
+            !kick <member> <reason>
+        """
+
         author = ctx.message.author
         guild = ctx.guild
         date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if member:
             if reason != "":
                 try:
-                    self.cursor.execute("SELECT kick FROM SERVER WHERE id_server=?", (str(ctx.guild.id),))
+                    self.cursor.execute("SELECT kick, log_channel_id FROM SERVER WHERE id_server=?",
+                                        (str(ctx.guild.id),))
                     data = self.cursor.fetchone()
 
                     if data:
@@ -79,7 +96,7 @@ class Moderation(commands.Cog):
                             await guild.kick(user=member, reason=reason)
 
                             if self.setting[str(guild.id)]["log_channel"] is not None:
-                                channel = await self.bot.fetch_channel(self.setting[str(guild.id)]["log_channel"])
+                                channel = await self.bot.fetch_channel(int(data[1]))
                                 embed = discord.Embed(title="Member kick",
                                                       description="---------------------------------------------"
                                                                   "---------", color=0x00ff00)
@@ -105,13 +122,22 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member = None, *, reason=""):
+        """
+        Ban command
+        ban a user, send him a message and log the ban on the log chanel
+
+        use:
+            !ban <member> <reason>
+        """
+
         author = ctx.message.author
         guild = ctx.guild
         date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if member:
             if reason != "":
                 try:
-                    self.cursor.execute("SELECT purge FROM SERVER WHERE id_server=?", (str(ctx.guild.id),))
+                    self.cursor.execute("SELECT ban, log_channel_id FROM SERVER WHERE id_server=?",
+                                        (str(ctx.guild.id),))
                     data = self.cursor.fetchone()
 
                     if data:
@@ -131,7 +157,7 @@ class Moderation(commands.Cog):
                             await dm.send(embed=embed_dm)
 
                             if self.setting[str(guild.id)]["log_channel"] is not None:
-                                channel = await self.bot.fetch_channel(self.setting[str(guild.id)]["log_channel"])
+                                channel = await self.bot.fetch_channel(int(data[1]))
 
                                 await guild.ban(user=member, reason=reason)
                                 embed = discord.Embed(title="Member ban", description="-----------------------"
