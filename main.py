@@ -18,7 +18,7 @@ __author__ = "Tristan Leroy"
 __copyright__ = "None"
 __credits__ = ["Tristan Leroy"]
 __license__ = "None"
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __maintainer__ = "Tristan Leroy"
 __email__ = "contact@redbow.fr"
 __status__ = "Devs"
@@ -187,7 +187,6 @@ async def unload(ctx, extension):
 
 
 # TODO: Stream alert [ON/OFF]
-# TODO: STRAWPOLL commands
 # TODO: User stats
 # TODO: GET_USERS_STATS commands
 
