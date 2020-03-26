@@ -90,14 +90,28 @@ def init_db(db_cursor, db_conn):
                             finish              BOOLEAN         DEFAULT FALSE       NOT NULL
                             )""")
 
+    db_cursor.execute("""CREATE TABLE IF NOT EXISTS USERS (
+                            id_user             VARCHAR(100)    NOT NULL,
+                            id_server           VARCHAR(100)    NOT NULL,
+                            PRIMARY KEY(id_user, id_server)
+                            )""")
+
+    db_cursor.execute("""CREATE TABLE IF NOT EXISTS WARN (
+                            id_warn             INTEGER         PRIMARY KEY         AUTOINCREMENT,
+                            id_user             VARCHAR(100)    NOT NULL,
+                            id_server           VARCHAR(100)    NOT NULL,
+                            reason              TEXT            NOT NULL,
+                            date                DATE            NOT NULL
+                            )""")
+
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS TEMPBAN (
-                                id_ban              INTEGER         PRIMARY KEY     AUTOINCREMENT,
-                                id_user             VARCHAR(100)    NOT NULL,
-                                id_server           VARCHAR(100)    NOT NULL,
-                                reason              TEXT            NOT NULL,
-                                date_ban            DATE            NOT NULL,
-                                date_unban          DATE            NOT NULL
-                                )""")
+                            id_ban              INTEGER         PRIMARY KEY     AUTOINCREMENT,
+                            id_user             VARCHAR(100)    NOT NULL,
+                            id_server           VARCHAR(100)    NOT NULL,
+                            reason              TEXT            NOT NULL,
+                            date_ban            DATE            NOT NULL,
+                            date_unban          DATE            NOT NULL
+                            )""")
 
     db_conn.commit()
 
@@ -155,6 +169,7 @@ bot.remove_command("help")
 async def load(ctx, extension):
     """
     Command for load a cogs
+    load a specified cog
     """
 
     if extension + ".py" in os.listdir("./cogs"):
@@ -175,6 +190,10 @@ async def load(ctx, extension):
 async def unload(ctx, extension):
     """
     Command for unload a cogs
+    unload a specifed cog
+
+    use:
+        !unload <extension>
     """
 
     try:
@@ -187,8 +206,6 @@ async def unload(ctx, extension):
 
 
 # TODO: Stream alert [ON/OFF]
-# TODO: User stats
-# TODO: GET_USERS_STATS commands
 
 # Load all the cogs at the launch of the bot
 for filename in os.listdir('./cogs'):

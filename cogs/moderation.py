@@ -30,6 +30,7 @@ class Moderation(commands.Cog):
     # TODO: UNBAN commands
     # TODO: TEMPBAN commands
     # TODO: TEMPUNBAN tasks
+    # TODO: WARN commands
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
